@@ -21,41 +21,6 @@ sns.set()
 
 def reduce_mem_usage(df, verbose=False):
     start_mem = df.memory_usage().sum() / 1024**2
-
-
-warnings.filterwarnings("ignore")
-pd.set_option("display.max_columns", 500)
-pd.set_option("display.max_rows", 500)
-register_matplotlib_converters()
-sns.set()
-
-
-def reduce_mem_usage(df, verbose=False):
-    start_mem = df.memory_usage().sum() / 1024**2
-    int_columns = df.select_dtypes(include=["int"]).columns
-    float_columns = df.select_dtypes(include=["float"]).column
-
-
-warnings.filterwarnings("ignore")
-pd.set_option("display.max_columns", 500)
-pd.set_option("display.max_rows", 500)
-register_matplotlib_converters()
-sns.set()
-
-
-def reduce_mem_usage(df, verbose=False):
-    start_mem = df.memory_usage().sum() / 1024**2
-
-
-warnings.filterwarnings("ignore")
-pd.set_option("display.max_columns", 500)
-pd.set_option("display.max_rows", 500)
-register_matplotlib_converters()
-sns.set()
-
-
-def reduce_mem_usage(df, verbose=False):
-    start_mem = df.memory_usage().sum() / 1024**2
     int_columns = df.select_dtypes(include=["int"]).columns
     float_columns = df.select_dtypes(include=["float"]).columns
 

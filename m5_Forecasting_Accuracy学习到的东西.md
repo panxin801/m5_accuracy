@@ -66,3 +66,15 @@ multioutput：多维输入输出，默认为’uniform_average’，计算所有
 7. from sklearn.preprocessing import LabelEncoder
 
 [参考](https://blog.csdn.net/kancy110/article/details/75043202)
+
+
+
+8. pd.set_option("display.max_columns", 500)
+
+[参考](https://blog.csdn.net/xiongzaiabc/article/details/103023256)
+
+
+
+9. sns.set()
+
+[参考](https://blog.csdn.net/unixtch/article/details/78820654)
