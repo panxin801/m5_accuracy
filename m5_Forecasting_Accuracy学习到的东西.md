@@ -54,7 +54,7 @@ seaborn 和matplotlib并成为世界两大图像现实库。seborn基于matplotl
 格式：
 sklearn.metrics.mean_squared_error(y_true, y_pred, sample_weight=None, multioutput=’uniform_average’)
 参数：
-y_true：真实值。
+y_true：真实值。[]
 y_pred：预测值。
 sample_weight：样本权值。
 multioutput：多维输入输出，默认为’uniform_average’，计算所有元素的均方误差，返回为一个标量；也可选‘raw_values’，计算对应列的均方误差，返回一个与列数相等的一维数组。
@@ -78,3 +78,74 @@ multioutput：多维输入输出，默认为’uniform_average’，计算所有
 9. sns.set()
 
 [参考](https://blog.csdn.net/unixtch/article/details/78820654)
+
+
+
+10. input_dir=f"{this_will_be_replaced}/data/dir"
+
+python 3.6 新加入的f-string。
+
+[f-string](https://www.cnblogs.com/insane-Mr-Li/p/12973941.html)
+
+[定义字符串其他前缀](https://www.cnblogs.com/walo/p/10608436.html)
+
+
+
+11. pd.read_csv()
+
+[read_csv](https://blog.csdn.net/weixin_37841694/article/details/80139479)
+
+
+
+12. pd.DataFrame.pipe()
+
+类似linux 中的管道|
+
+[参考](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pipe.html)
+
+[不同维度用不同函数](https://www.e-learn.cn/topic/3546511)
+
+
+
+13. df.select_dtypes(include=["int"])
+
+通过类型选择子数据框
+
+```python
+>>> df.select_dtypes(include="int")
+   a
+0  1
+1  2
+2  1
+3  2
+4  1
+5  2
+>>> df.select_dtypes(include="int").columns
+Index(['a'], dtype='object')
+>>> df
+   a      b    c
+0  1   True  1.0
+1  2  False  2.0
+2  1   True  1.0
+3  2  False  2.0
+4  1   True  1.0
+5  2  False  2.0
+>>> 
+
+```
+
+[参考](https://blog.csdn.net/xiezhen_zheng/article/details/83716267)
+
+
+
+14. sklearn.LabelEncoder
+
+[参考](https://blog.csdn.net/lw_power/article/details/82981122)
+
+
+
+15. pd.Series)()
+
+pandas使用两种方法组织数据一种是df 另一种是Series类似numpy
+
+[参考](https://blog.csdn.net/weixin_43868107/article/details/102631717)
