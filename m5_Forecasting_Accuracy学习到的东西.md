@@ -93,6 +93,8 @@ python 3.6 新加入的f-string。
 
 11. pd.read_csv()
 
+返回的`dataframe[a][b]`假设read_csv读取的文件是[113,4]就是113行4列的数据。那么dataframe.shape=[113,4]但是dataframe["abc"]是找key="abc"的那个列
+
 [read_csv](https://blog.csdn.net/weixin_37841694/article/details/80139479)
 
 
@@ -142,6 +144,8 @@ Index(['a'], dtype='object')
 
 [参考](https://blog.csdn.net/lw_power/article/details/82981122)
 
+[官方解释](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html)
+
 
 
 15. pd.Series)()
@@ -149,3 +153,43 @@ Index(['a'], dtype='object')
 pandas使用两种方法组织数据一种是df 另一种是Series类似numpy
 
 [参考](https://blog.csdn.net/weixin_43868107/article/details/102631717)
+
+
+
+16. df.melt
+
+pandas做数据df的转换melt。与之相反的操作是pivot
+
+![image-20200614162428365](m5_Forecasting_Accuracy学习到的东西.assets/image-20200614162428365.png)
+
+[参考](https://blog.csdn.net/mingkoukou/article/details/82867218)
+
+[写的更好的一个](https://blog.csdn.net/maymay_/article/details/80039677)
+
+
+
+17. pandas df.merge
+
+merge: 合并数据集， 通过left， right确定连接字段，默认是两个数据集相同的字段 
+
+[参考](https://www.cnblogs.com/lijinze-tsinghua/p/9878649.html)
+
+
+
+18. df.groupby
+
+分组计算
+
+![image-20200614210014220](m5_Forecasting_Accuracy学习到的东西.assets/image-20200614210014220.png)
+
+[参考](https://www.cnblogs.com/keye/p/11153427.html)
+
+19. df.transform
+20. rolling
+21. skew
+22. kurt
+23.  pd.to_datetime()
+
+解析时间格式
+
+[参考](https://blog.csdn.net/Kwoky/article/details/91480035)
