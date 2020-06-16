@@ -6,11 +6,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import warnings
+from src.TimeSeriesSpliter import CustomTimeSeriesSpliter
 
 from pandas.plotting import register_matplotlib_converters
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error, mean_squared_log_error
 import lightgbm as lgbm
+from mlflow_extend import mlflow, plotting as mplt
 
 warnings.filterwarnings("ignore")  # ignore warnings will emerge in the program
 # set maximun display columns and raws
@@ -141,6 +143,66 @@ def rmse(y_true, y_pred):
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
 
+def show_cv_days(cv, x, dt_col, day_col):
+    for ii, (tr, tt) in enumerate(cv.split(x)):
+        print(f"----- Fold: ({ii + 1} / {cv.n_splits}) -----")
+        tr_start = x.iloc[tr][dt_col].min()
+        tr_end = x.iloc[tr][dt_col].max()
+        tr_days = x.iloc[tr][day_col].max() - x.iloc[tr][day_col].min() + 1
+
+        tt_start = x.iloc[tt][dt_col].min()
+        tt_end = x.iloc[tt][dt_col].max()
+        tt_days = x.iloc[tt][day_col].max() - x.iloc[tt][day_col].min() + 1
+
+        df = pd.DataFrame(
+            {
+                "start": [tr_start, tt_start],
+                "end": [tr_end, tt_end],
+                "days": [tr_days, tt_days],
+            },
+            index=["train", "test"],
+        )
+        print(df)
+
+
+def plot_cv_indices(cv, x, dt_col, lw=10):
+    n_splits = cv.get_splits()
+    fig, ax = plt.subplots(figsize=(20, n_splits))
+
+    # Generate the training/testing visualizations for each CV split
+    for ii, (tr, tt) in enumerate(cv.split(x)):
+        # Fill in indices with the training/test groups
+        indices = np.array([np.nan] * len(x))
+        indices[tt] = 1
+        indices[tr] = 0
+
+        # Visualize the results
+        ax.scatter(
+            x[dt_col],
+            [ii + 0.5] * len(indices),
+            c=indices,
+            marker="_",
+            lw=lw,
+            cmap=plt.cm.coolwarm,
+            vmin=-0.2,
+            vmax=1.2,
+        )
+
+    # Formatting
+    MIDDLE = 15
+    LARGE = 20
+    ax.set_xlabel("Datetime", fontsize=LARGE)
+    ax.set_xlim([x[dt_col].min(), x[dt_col].max()])
+    ax.set_ylabel("CV iteration", fontsize=LARGE)
+    ax.set_yticks(np.arange(n_splits) + 0.5)
+    ax.set_yticklabels(list(range(n_splits)))
+    ax.invert_yaxis()
+    ax.tick_params(axis="both", which="major", labelsize=MIDDLE)
+    ax.set_title("{}".format(type(cv).__name__), fontsize=LARGE)
+    plt.show()
+    return ax
+
+
 def add_demand_features(df, pred_days):
     for diff in [0, 1, 2]:
         shift = pred_days + diff
@@ -210,6 +272,31 @@ def add_time_features(df, dt_col):
     return df
 
 
+def train_lgb(bst_params, fit_params, x, y, cv, drop_when_train=None):
+    models = []
+    if drop_when_train is None:
+        drop_when_train = []
+
+    for idx_fold, (idx_train, idx_val) in enumerate(cv.split(x, y)):
+        print(f"\n----- Fold: ({idx_fold + 1} / {cv.get_splits()}) -----\n")
+
+        x_train, x_val = x.iloc[idx_train], x.iloc[idx_val]
+        y_train, y_val = y.iloc[idx_train], y.iloc[idx_val]
+        train_set = lgbm.Dataset(x_train.drop(
+            drop_when_train, axis=1), y_train, categorical_feature=["item_id"])
+        valid_set = lgbm.Dataset(x_val.drop(
+            drop_when_train, axis=1), y_val, categorical_feature=["item_id"])
+
+        model = lgbm.train(bst_params, train_set, valid_sets=[
+                           train_set, valid_set], valid_names=["train", "valid"], **fit_params)
+        models.append(model)
+
+    # release resource
+    del idx_train, idx_val, x_train, x_val, y_train, y_val
+    gc.collect()
+    return models
+
+
 def main():
     calendar, prices, sales, submission = read_data()
     num_items = sales.shape[0]
@@ -245,6 +332,112 @@ def main():
     print("start date:", data[dt_col].min())
     print("end date:", data[dt_col].max())
     print("data shape:", data.shape)
+
+    # stage 2
+    day_col = "d"
+    cv_params = {"n_splits": 3, "train_days": int(
+        365 * 1.5), "test_days": pred_days, "day_col": day_col, "pred_days": pred_days}
+    cv = CustomTimeSeriesSpliter(**cv_params)
+    sample = data.iloc[::1000][[day_col, dt_col]].reset_index(drop=True)
+    show_cv_days(cv, sample, dt_col, day_col)
+    plot_cv_indices(cv, sample, dt_col)
+    del sample
+    gc.collect()
+
+    features = [
+        "item_id",
+        "dept_id",
+        "cat_id",
+        "store_id",
+        "state_id",
+        "event_name_1",
+        "event_type_1",
+        "event_name_2",
+        "event_type_2",
+        "snap_CA",
+        "snap_TX",
+        "snap_WI",
+        "sell_price",
+        # demand features
+        "shift_t28",
+        "shift_t29",
+        "shift_t30",
+        # std
+        "rolling_std_t7",
+        "rolling_std_t30",
+        "rolling_std_t60",
+        "rolling_std_t90",
+        "rolling_std_t180",
+        # mean
+        "rolling_mean_t7",
+        "rolling_mean_t30",
+        "rolling_mean_t60",
+        "rolling_mean_t90",
+        "rolling_mean_t180",
+        # min
+        "rolling_min_t7",
+        "rolling_min_t30",
+        "rolling_min_t60",
+        # max
+        "rolling_max_t7",
+        "rolling_max_t30",
+        "rolling_max_t60",
+        # others
+        "rolling_skew_t30",
+        "rolling_kurt_t30",
+        # price features
+        "price_change_t1",
+        "price_change_t365",
+        "rolling_price_std_t7",
+        "rolling_price_std_t30",
+        # time features
+        "year",
+        "quarter",
+        "month",
+        "week",
+        "day",
+        "dayofweek",
+        "is_weekend",
+    ]
+    is_train = data["d"] < 1914
+
+    # Attach "d" to X_train for cross validation.
+    x_train = data[is_train][[day_col] + features].reset_index(drop=True)
+    y_train = data[is_train]["demand"].reset_index(drop=True)
+    x_test = data[~is_train][features].reset_index(drop=True)
+    # keep these two columns to use later.
+    id_date = data[~is_train][["id", "date"]].reset_index(drop=True)
+    del data
+    gc.collect()
+
+    print("x_train shape:", x_train.shape)
+    print("x_test shape:", x_test.shape)
+    bst_params = {"boosting_type": "gbdt", "metric": "rmse",
+                  "objective": "regression", "n_jobs": -1, "seed": 42, "learning_rate": 0.1,
+                  "bagging_fraction": 0.75, "bagging_freq": 10, "colsample_bytree": 0.75}
+    fit_params = {"num_boost_round": 100_000,
+                  "early_stopping_rounds": 50, "verbose_eval": 100}
+    models = train_lgb(bst_params, fit_params, x_train,
+                       y_train, cv, drop_when_train=[day_col])
+    del x_train, y_train
+    gc.collect()
+
+    imp_type = "gain"
+    importances = np.zeros(x_test.shape[1])
+    preds = np.zeros(x_test.shape[0])
+    for model in models:
+        preds += model.predict(x_test)
+        importances += model.feature_importance(imp_type)
+    preds = preds / cv.get_splits()
+    importances = importances / cv.get_splits()
+
+    with mlflow.start_run():
+        mlflow.log_params_flatten(
+            {"bst": bst_params, "fit": fit_params, "cv": cv_params})
+
+    features = models[0].feature_name()
+    fig = mplt.feature_importance(features, importances, imp_type, limit=30)
+    plt.show()
 
 
 if __name__ == "__main__":

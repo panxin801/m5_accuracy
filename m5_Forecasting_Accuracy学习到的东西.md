@@ -184,12 +184,91 @@ merge: 合并数据集， 通过left， right确定连接字段，默认是两�
 
 [参考](https://www.cnblogs.com/keye/p/11153427.html)
 
+
+
 19. df.transform
+
+transform处理完了以后的输入输出的维度是一样的。groupby的结果transform之后就是和整个数据表的维度。
+
+[参考]https://www.jianshu.com/p/509d7b97088c
+
+
+
 20. rolling
-21. skew
-22. kurt
-23.  pd.to_datetime()
+
+就是一个滑动窗的概念其中的参数`window`表示这个窗里边的元素有多少个，`min_periods`表示这个窗口里最少需要多少个元素。pandas里边的`offset`是一个很有意思的东西，我还需要去确定以下这个东西怎么用。
+
+[官网解释](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.rolling.html)
+
+[参考](https://blog.csdn.net/qifeidemumu/article/details/88748248)
+
+[高阶参考](https://blog.csdn.net/wj1066/article/details/78853717)
+
+
+
+21. shift
+
+在某个方向平移数据，可以设置空数据的填充值
+
+[参考](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shift.html)
+
+
+
+22. skew
+
+计算数据的偏度`skewness`。实现是通过三阶标准化矩来实现的。
+
+[参考](https://blog.csdn.net/u010665216/article/details/78591288)
+
+
+
+23. kurt
+
+数据的尖锐程度，和上边的skew都是常用的统计量
+
+[参考](https://www.cnblogs.com/wyy1480/p/10474046.html)
+
+
+
+24. pd.to_datetime()
 
 解析时间格式
 
 [参考](https://blog.csdn.net/Kwoky/article/details/91480035)
+
+
+
+25. df.drop
+
+用法：DataFrame.drop(labels=None,axis=0, index=None, columns=None, inplace=False)
+
+参数说明：
+labels 就是要删除的行列的名字，用列表给定
+axis 默认为0，指删除行，因此删除columns时要指定axis=1；
+index 直接指定要删除的行
+columns 直接指定要删除的列
+inplace=False，默认该删除操作不改变原数据，而是返回一个执行删除操作后的新dataframe；
+inplace=True，则会直接在原数据上进行删除操作，删除后无法返回。
+
+因此，删除行列有两种方式：
+1）labels=None,axis=0 的组合
+2）index或columns直接指定要删除的行或列
+
+[原文链接](https://blog.csdn.net/songyunli1111/article/details/79306639)
+
+
+
+26. python getattr()
+
+python中用于获得数据的attr的函数
+
+[参考](https://www.runoob.com/python/python-func-getattr.html)
+
+
+
+27. python **args
+28. df.iloc()
+
+提取整行或者整列的数据，iloc[[1,2],[0，1]]就是提取[1,2]行和[0,1]列的数据。
+
+[参考](https://blog.csdn.net/w_weiying/article/details/81411257)
