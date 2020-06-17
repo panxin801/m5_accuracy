@@ -297,6 +297,22 @@ def train_lgb(bst_params, fit_params, x, y, cv, drop_when_train=None):
     return models
 
 
+def make_submission(test, submission, pred_days):
+    preds = test[["id", "date", "demand"]]
+    preds = preds.pivot(index="id", columns="date",
+                        values="demand").reset_index()
+    preds.columns = ["id"] + ["F" + str(d + 1) for d in range(pred_days)]
+
+    vals = submission[["id"]].merge(preds, how="inner", on="id")
+    evals = submission[submission["id"].str.endswith("evaluation")]
+    final = pd.concat([vals, evals])
+
+    assert final.drop("id", axis=1).isnull().sum().sum() == 0
+    assert final["id"].equals(submission["id"])
+
+    final.to_csv("submission.csv", index=False)
+
+
 def main():
     calendar, prices, sales, submission = read_data()
     num_items = sales.shape[0]
@@ -438,6 +454,8 @@ def main():
     features = models[0].feature_name()
     fig = mplt.feature_importance(features, importances, imp_type, limit=30)
     plt.show()
+
+    make_submission(id_date.assign(demand=preds), submission, pred_days)
 
 
 if __name__ == "__main__":

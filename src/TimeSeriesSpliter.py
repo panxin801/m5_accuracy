@@ -14,6 +14,7 @@ class CustomTimeSeriesSpliter:
         train_sec = self.train_days * sec_in_day
         test_sec = self.test_days * sec_in_day
         total_sec = train_sec + test_sec
+
         if self.n_splits == 1:
             train_start = duration - total_sec
             train_end = train_start + train_sec
@@ -21,9 +22,9 @@ class CustomTimeSeriesSpliter:
             test_mask = sesc >= train_end
             yield sesc[train_mask].index.values, sesc[test_mask].index.values
         else:
-            step = self.pred_days / sec_in_day
+            step = self.pred_days * sec_in_day
             for nj in range(self.n_splits):
-                shift = (self.n_splits - nj + 1) * step
+                shift = (self.n_splits - (nj + 1)) * step
                 train_start = duration - total_sec - shift
                 train_end = train_start + train_sec
                 test_end = train_end + test_sec
