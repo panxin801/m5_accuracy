@@ -65,6 +65,31 @@ multioutput：多维输入输出，默认为’uniform_average’，计算所有
 
 7. from sklearn.preprocessing import LabelEncoder
 
+`LabelEncoder`会将其中的不同的值取出来并按着顺序给值0,1,2......
+
+Case1:
+
+```python
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+le.fit([1, 2, 2, 3, 6])
+print(le.classes_) # [1 2 3 6]
+ret = le.transform([1, 1, 3, 6, 2])
+print(ret) # [0 0 2 3 1]
+```
+
+Case2:
+
+```python
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+ret = le.fit_transform([1, 1, 3, 6, 2])
+print(le.classes_) # [1 2 3 6]
+print(ret) # [0 0 2 3 1]
+```
+
+
+
 [参考](https://blog.csdn.net/kancy110/article/details/75043202)
 
 
@@ -158,9 +183,18 @@ pandas使用两种方法组织数据一种是df 另一种是Series类似numpy
 
 16. df.melt
 
-pandas做数据df的转换melt。与之相反的操作是pivot
+pandas做数据df的转换melt。数据分析的时候经常要把**宽数据**--->>**长数据**。与之相反的操作是pivot
 
 ![image-20200614162428365](m5_Forecasting_Accuracy学习到的东西.assets/image-20200614162428365.png)
+
+```python
+params:
+id_vars:不需要被转换的列名。
+value_vars:需要转换的列名，如果剩下的列全部都要转换，就不用写了。
+var_name和value_name是自定义设置对应的列名。
+```
+
+
 
 [参考](https://blog.csdn.net/mingkoukou/article/details/82867218)
 

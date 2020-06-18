@@ -64,12 +64,13 @@ def reduce_mem_usage(df, verbose=False):
     return df
 
 
-def encoder_category(df, cols):  # encode input columns
+def encoder_category(df, cols):  # encode input columns from string to int numeric
     for col in cols:
         le = LabelEncoder()
         # extrac this cols which are not null
         not_null = df[col][df[col].notnull()]
-        df[col] = pd.Series(le.fit_transform(not_null), index=not_null.index)
+        df[col] = pd.Series(le.fit_transform(not_null),
+                            index=not_null.index)  # 新的列的索引还是使用旧的列的索引编号
     return df
 
 
@@ -79,11 +80,18 @@ def extract_num(ser):  # extract num from column "d" which stores "d_1, d_2,....
 
 def reshape_sales(sales, submission, pred_days, d_thresh=0, verbose=False):
     # melt sales data, get it ready for training
-    id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
+    id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id",
+                  "state_id"]  # all these columns all belongs to sales
     product = sales[id_columns]  # columns in sales relates with id_columns
     # new column value named demand and variable column named d
     sales = sales.melt(id_vars=id_columns, var_name="d", value_name="demand")
     sales = reduce_mem_usage(sales)
+    '''
+                                                                      id  item_id  dept_id  cat_id  store_id    state_id    demand
+0  HOBBIES_1_001_CA_1_validation     1437        3       1         0           0                d_1              0
+1  HOBBIES_1_002_CA_1_validation     1438        3       1         0           0                d_1              0
+2  HOBBIES_1_003_CA_1_validation     1439        3       1         0           0                d_1              0
+    '''
 
     # separate test dataframes.
     vals = submission[submission["id"].str.endswith("validation")]
